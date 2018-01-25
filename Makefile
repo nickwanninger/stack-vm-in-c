@@ -2,13 +2,13 @@ CC:=gcc
 CFLAGS:=-Wall -std=c99 -O2
 LIBS:=-lm
 
-vm: src/vm/vm.c
-	$(CC) $(CFLAGS) $(LIBS) -o vm src/vm/vm.c
+vm: src/vm.c
+	$(CC) $(CFLAGS) $(LIBS) -o vm src/vm.c
 	@echo "Built\n"
 
 
-asm: src/asm/asm.c
-	$(CC) $(CFLAGS) $(LIBS) -o asm src/asm/asm.c
+asm: src/assembler.c
+	$(CC) $(CFLAGS) $(LIBS) -o asm src/assembler.c
 	@echo "Built\n"
 
 

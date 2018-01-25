@@ -2,12 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 
 
-#define NOOP   0x0 // None                                                  - 1 byte
-#define HALT   0x1 // HALT the program and kill the process                 - 1 byte
-#define EMIT   0x2 // Pop and PRINT the value at the top of the stack       - 1 byte
-#define PUSHI   0x3 // PUSH and integer constant to the top of the stack     - 5 bytes
+#include "opcodes.h"
 
 
 typedef union stackobject_t {
@@ -17,12 +15,12 @@ typedef union stackobject_t {
 	int64_t i64; // 8 bytes
 	float f32;   // 4 bytes 6 decimal precision
 	double d64;  // 8 bytes
-} stackobject;
+} stackobject_t;
 
 typedef struct instruction {
-	char opcode;
-	stackobject operand;
-} instruction;
+	uint8_t opcode;
+	stackobject_t operand;
+} instruction_t;
 
 size_t sp; // Stack Pointer
 size_t pc; // Program counter
@@ -37,7 +35,7 @@ typedef struct machineinfo {
 } INFO_t;
 
 
-stackobject stack[1024]; // Create a 1KB type-independent stack (will take up typeof(long) * 1024 bytes)
+stackobject_t stack[1024]; // Create a 1KB type-independent stack (will take up typeof(long) * 1024 bytes)
 
 void usage();
 
