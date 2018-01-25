@@ -1,17 +1,20 @@
 CC:=gcc
-CFLAGS:=-Wall -std=c99
+CFLAGS:=-Wall -std=c99 -O2
 LIBS:=-lm
 
-# When just running "make", run "make vm" instead
-default: vm
+vm: src/vm/vm.c
+	$(CC) $(CFLAGS) $(LIBS) -o vm src/vm/vm.c
+	@echo "Built\n"
 
-# compile the source into a binary file
-vm: src/vm.c
-	$(CC) $(CFLAGS) $(LIBS) -o bin/$@ src/$@.c
+
+asm: src/asm/asm.c
+	$(CC) $(CFLAGS) $(LIBS) -o asm src/asm/asm.c
+	@echo "Built\n"
+
 
 # Run the binary file without having to type it out
 run:
-	./bin/vm
+	@./bin/vm
 
 clean:
-	rm -rf bin/*
+	rm vm
