@@ -48,10 +48,10 @@ int main(int argc, char **argv) {
 				fwrite(&op, sizeof(op), 1, outputfile);
 			}
 
-			// Handle PUSHI
-			if (strcmp(opcode, "PUSHI") == 0) {
+			// Handle PI32
+			if (strcmp(opcode, "PI32") == 0) {
 				printf("%s\n", opcode);
-				uint8_t op = PUSHI;
+				uint8_t op = PI32;
 				int32_t a = atoi(arg1);
 				fwrite(&op, sizeof(op), 1, outputfile);
 				fwrite(&a, sizeof(a), 1, outputfile);

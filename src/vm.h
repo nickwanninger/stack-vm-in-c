@@ -3,18 +3,24 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-
+#include "datatypes.h"
 
 #include "opcodes.h"
 
 
-typedef union stackobject_t {
+typedef union {
 	int8_t i8;   // 1 byte
 	int16_t i16; // 2 bytes
 	int32_t i32; // 4 bytes
 	int64_t i64; // 8 bytes
 	float f32;   // 4 bytes 6 decimal precision
 	double d64;  // 8 bytes
+} data_t;
+
+
+typedef struct stackobject_t {
+	char type;
+	data_t data;	
 } stackobject_t;
 
 typedef struct instruction {
@@ -26,13 +32,6 @@ size_t sp; // Stack Pointer
 size_t pc; // Program counter
 long opcount; // number of ops executed
 
-
-typedef struct machineinfo {
-	int pc;
-	int fp;
-	int sp;
-	int opcount;
-} INFO_t;
 
 
 stackobject_t stack[1024]; // Create a 1KB type-independent stack (will take up typeof(long) * 1024 bytes)

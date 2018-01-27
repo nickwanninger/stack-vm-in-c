@@ -1,10 +1,40 @@
 #include "vm.h"
 
+
+
+void printstk() {
+	// size_t stacksize = sizeof(stack)/sizeof(stackobject_t);
+	printf("\x1B[36mSTACK:\t");
+	
+	int i;
+	for (i = 0; i < sp + 1; i++) {
+		printf("0x%04x ", stack[i].data.i32);
+	}
+
+	printf("\x1B[0m\n");
+}
+
+
+void emit(stackobject_t *obj) {
+
+	switch (obj->type) {
+		case I32_T:
+			printf("%d\n", obj->data.i32);
+		break;
+	}
+	
+}
+
+int halt() {
+	return 0;
+}
+
+
 int main (int argc, char **argv) {
 
 	
 	pc = 0;
-	sp = 0;
+	sp = -1;
 	opcount = 0;
 	FILE *source_file = fopen(argv[1], "rb");
 	// instruction_t *code;
@@ -48,10 +78,12 @@ int main (int argc, char **argv) {
 			instr->opcode = op;
 			// only argument based instructions will be handled as
 			// all other instructions need only contain the opcode
-			if (op == PUSHI) {
-				instr->operand.i32 = *(int*)(codebytes + i + 1);
+			if (op == PI32) {
+				instr->operand.type = I32_T;
+				instr->operand.data.i32 = *(int*)(codebytes + i + 1);
 				i += 4;
 			}
+
 			code[ic] = *instr;
 			ic++;
 		} else {
@@ -62,13 +94,48 @@ int main (int argc, char **argv) {
 
 	instruction_t current = code[pc];
 	while (current.opcode != HALT) {
-		printf("%d\n", current.opcode);
-		pc++;
+
+		data_t a;
+		data_t b;
+		// stackobject_t newobj;
+		switch (current.opcode) {
+			case PI32:
+				sp++;
+				pc++;
+				stack[sp].type = I32_T;
+				stack[sp].data.i32 = current.operand.data.i32;
+				break;
+
+			case ADDI:
+				a.i64 = stack[sp--].data.i64;
+				b.i64 = stack[sp--].data.i64;
+				sp++;
+				stack[sp].type = I32_T;
+				stack[sp].data.i32 = a.i64 + b.i64;
+				pc++;
+				break;
+
+			case EMIT:
+				// Pop and emit the value at the pointer pointer
+				emit(&stack[sp--]);
+				pc++;
+				break;
+			
+			
+			default:
+				// Unknown code, do something in the future.
+				pc++;
+				break;
+
+
+			case HALT:
+				return halt();
+		}
+
+		printstk();
+		opcount++;
 		current = code[pc];
 	}
-
-
-	free(codebytes);
 	
 
 	return 0;
