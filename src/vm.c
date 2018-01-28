@@ -1,42 +1,50 @@
 #include "vm.h"
-
-
+#include <unistd.h>
 
 void printstk() {
 	// size_t stacksize = sizeof(stack)/sizeof(stackobject_t);
 	printf("\x1B[36mSTACK:\t");
-	
+	printf("PC: %d\t", pc);
+	printf("SP: %d\t", sp);
+	printf("| ");
 	int i;
 	for (i = 0; i < sp + 1; i++) {
-		printf("0x%04x ", stack[i].data.i32);
+		printf("%d ", stack[i].data.i16);
 	}
-
 	printf("\x1B[0m\n");
 }
 
+void clearConsole() {
+	printf("\e[1;1H\e[2J");
+}
 
-void emit(stackobject_t *obj) {
-
-	switch (obj->type) {
-		case I32_T:
-			printf("%d\n", obj->data.i32);
-		break;
-	}
-	
+void printInstruction(instruction_t *i) {
+	printf("\x1b[34mOPCODE: 0x%02x\n", i->opcode);
+	printf("\x1B[0m");
 }
 
 int halt() {
 	return 0;
 }
 
+void emit(stackobject_t obj) {
+	switch (obj.type) {
+		case I16_T:
+			printf("%d\n", obj.data.i16);
+		break;
+		default:
+			printf("shrug\n");
+			break;
+	}
+}
 
 int main (int argc, char **argv) {
 
-	
+	char *filename = argv[argc - 1];
 	pc = 0;
 	sp = -1;
 	opcount = 0;
-	FILE *source_file = fopen(argv[1], "rb");
+	FILE *source_file = fopen(filename, "rb");
 	// instruction_t *code;
 	char *codebytes;
 
@@ -58,7 +66,6 @@ int main (int argc, char **argv) {
 	// close the file
 	fclose(source_file);
 
-
 	unsigned long bytecount = fsize * sizeof(uint8_t);
 	// Allocate memory for the code struct array
 	// To be safe, I'll allocate enough for each byte
@@ -78,12 +85,16 @@ int main (int argc, char **argv) {
 			instr->opcode = op;
 			// only argument based instructions will be handled as
 			// all other instructions need only contain the opcode
-			if (op == PI32) {
-				instr->operand.type = I32_T;
-				instr->operand.data.i32 = *(int*)(codebytes + i + 1);
-				i += 4;
+			if (op == PI16) {
+				instr->operand.type = I16_T;
+				instr->operand.data.i16 = *(int16_t*)(codebytes + i + 1);
+				i += 2;
 			}
-
+			if (op == JUMP) {
+				instr->operand.type = I16_T;
+				instr->operand.data.i16 = *(int16_t*)(codebytes + i + 1);
+				i += 2;
+			}
 			code[ic] = *instr;
 			ic++;
 		} else {
@@ -94,49 +105,70 @@ int main (int argc, char **argv) {
 
 	instruction_t current = code[pc];
 	while (current.opcode != HALT) {
+		if (DEBUG) {
+			clearConsole();
+			printf("\x1b[31mOP #%lld\x1b[0m\n", opcount);
+			printInstruction(&current);
+			printf("Stack before OP:\n\t");
+			printstk();
+			printf("\x1B[32m");
+			printf("DEBUG: press <enter> to run instruction");
+			printf("\x1B[0m\n");
+			getchar();
+		}
 
+		// Run the current instruction
+		step(current);
+		// increment opcount for debug
+		opcount++;
+		// Set the current instruction to
+		// the one at the program counter
+		current = code[pc];
+	}
+
+	return 0;
+}
+
+
+void step(instruction_t current) {
 		data_t a;
 		data_t b;
+
 		// stackobject_t newobj;
 		switch (current.opcode) {
-			case PI32:
-				sp++;
+			case PI16:
+				sp += 1;
+				stack[sp].type = I16_T;
+				stack[sp].data.i16 = current.operand.data.i16;
 				pc++;
-				stack[sp].type = I32_T;
-				stack[sp].data.i32 = current.operand.data.i32;
 				break;
 
 			case ADDI:
-				a.i64 = stack[sp--].data.i64;
-				b.i64 = stack[sp--].data.i64;
+				a.i16 = stack[sp--].data.i16;
+				b.i16 = stack[sp--].data.i16;
 				sp++;
-				stack[sp].type = I32_T;
-				stack[sp].data.i32 = a.i64 + b.i64;
+				stack[sp].type = I16_T;
+				stack[sp].data.i16 = a.i16 + b.i16;
 				pc++;
 				break;
 
 			case EMIT:
-				// Pop and emit the value at the pointer pointer
-				emit(&stack[sp--]);
+				emit(stack[sp--]);
 				pc++;
 				break;
-			
-			
+
+			case JUMP:
+				pc = current.operand.data.i16;
+				// pc++;
+				break;
+
 			default:
 				// Unknown code, do something in the future.
 				pc++;
 				break;
 
-
 			case HALT:
-				return halt();
+				break;
 		}
-
-		printstk();
-		opcount++;
-		current = code[pc];
-	}
-	
-
-	return 0;
 }
+

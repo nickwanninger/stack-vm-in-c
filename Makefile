@@ -8,7 +8,7 @@ all:
 	@$(MAKE) asm
 
 
-vm: src/vm.c
+vm: src/vm.c src/vm.h
 	$(CC) $(CFLAGS) $(LIBS) -o vm src/vm.c
 	@echo "Built\n"
 
@@ -19,3 +19,11 @@ asm: src/assembler.c
 clean:
 	rm vm
 	rm asm
+
+
+run:
+	@$(MAKE) clean
+	@$(MAKE) asm
+	@$(MAKE) vm
+	./asm test.asm
+	./vm output

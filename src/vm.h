@@ -7,16 +7,16 @@
 
 #include "opcodes.h"
 
+#define DEBUG 1
 
 typedef union {
-	int8_t i8;   // 1 byte
-	int16_t i16; // 2 bytes
-	int32_t i32; // 4 bytes
-	int64_t i64; // 8 bytes
-	float f32;   // 4 bytes 6 decimal precision
-	double d64;  // 8 bytes
+	char i8;   // 1 byte
+	short i16; // 2 bytes
+	// int32_t i32; // 4 bytes
+	// int64_t i64; // 8 bytes
+	// float f32;   // 4 bytes 6 decimal precision
+	// double d64;  // 8 bytes
 } data_t;
-
 
 typedef struct stackobject_t {
 	char type;
@@ -24,27 +24,20 @@ typedef struct stackobject_t {
 } stackobject_t;
 
 typedef struct instruction {
-	uint8_t opcode;
+	unsigned char opcode;
 	stackobject_t operand;
 } instruction_t;
 
-size_t sp; // Stack Pointer
-size_t pc; // Program counter
-long opcount; // number of ops executed
+int16_t sp; // Stack Pointer
+int16_t pc; // Program counter
+int64_t opcount; // number of ops executed
 
 
-
-stackobject_t stack[1024]; // Create a 1KB type-independent stack (will take up typeof(long) * 1024 bytes)
+stackobject_t stack[256];
 
 void usage();
 
 void run(char *program);
-
+void emit(stackobject_t obj);
+void step(instruction_t current);
 void printstack();
-
-// static char opcodes[] = {NOOP, HALT, POP, PUSHPC, POPPC, PUSHI, ADDI, SUBI, MULI, PRINT};
-// static char oplengths[] = {1, 1, 1, 1, 1, 5, 1, 1, 1, 1};
-
-
-
-

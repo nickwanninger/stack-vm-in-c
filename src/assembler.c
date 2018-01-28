@@ -29,39 +29,41 @@ int main(int argc, char **argv) {
 
 			// Handle NOOP
 			if (strcmp(opcode, "NOOP") == 0) {
-				printf("%s\n", opcode);
 				uint8_t op = NOOP;
 				fwrite(&op, sizeof(op), 1, outputfile);
 			}
 
 			// Handle HALT
 			if (strcmp(opcode, "HALT") == 0) {
-				printf("%s\n", opcode);
 				uint8_t op = HALT;
 				fwrite(&op, sizeof(op), 1, outputfile);
 			}
 
 			// Handle EMIT
 			if (strcmp(opcode, "EMIT") == 0) {
-				printf("%s\n", opcode);
 				uint8_t op = EMIT;
 				fwrite(&op, sizeof(op), 1, outputfile);
 			}
 
-			// Handle PI32
-			if (strcmp(opcode, "PI32") == 0) {
-				printf("%s\n", opcode);
-				uint8_t op = PI32;
-				int32_t a = atoi(arg1);
+			// Handle PI16
+			if (strcmp(opcode, "PI16") == 0) {
+				uint8_t op = PI16;
+				int16_t a = atoi(arg1);
 				fwrite(&op, sizeof(op), 1, outputfile);
 				fwrite(&a, sizeof(a), 1, outputfile);
 			}
 
 			// Handle ADDI
 			if (strcmp(opcode, "ADDI") == 0) {
-				printf("%s\n", opcode);
 				uint8_t op = ADDI;
 				fwrite(&op, sizeof(op), 1, outputfile);
+			}
+			// Handle JUMP
+			if (strcmp(opcode, "JUMP") == 0) {
+				uint8_t op = JUMP;
+				int16_t a = (int16_t)atol(arg1);
+				fwrite(&op, sizeof(op), 1, outputfile);
+				fwrite(&a, sizeof(a), 1, outputfile);
 			}
 		}
 	}
