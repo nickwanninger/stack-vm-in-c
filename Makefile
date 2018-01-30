@@ -8,12 +8,12 @@ all:
 	@$(MAKE) asm
 
 
-vm: src/vm.c src/vm.h
-	$(CC) $(CFLAGS) $(LIBS) -o vm src/vm.c
+vm: src/vm/*
+	$(CC) $(CFLAGS) $(LIBS) -o vm src/vm/main.c
 	@echo "Built\n"
 
 asm: src/assembler.c
-	$(CC) $(CFLAGS) $(LIBS) -o asm src/assembler.c
+	$(CC) $(CFLAGS) $(LIBS) -o asm src/assembler/assembler.c
 	@echo "Built\n"
 
 clean:

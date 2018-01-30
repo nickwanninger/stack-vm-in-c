@@ -7,7 +7,8 @@
 
 #include "opcodes.h"
 
-#define DEBUG 1
+#define true 1
+#define false 0
 
 typedef union {
 	char i8;   // 1 byte
@@ -20,7 +21,7 @@ typedef union {
 
 typedef struct stackobject_t {
 	char type;
-	data_t data;	
+	data_t data;
 } stackobject_t;
 
 typedef struct instruction {
@@ -32,8 +33,9 @@ int16_t sp; // Stack Pointer
 int16_t pc; // Program counter
 int64_t opcount; // number of ops executed
 
+char debug = false;
 
-stackobject_t stack[256];
+stackobject_t stack[4098];
 
 void usage();
 

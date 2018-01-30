@@ -1,0 +1,11 @@
+label main:
+	PUSH #1
+	PUSH #1
+	CALL test
+	EMIT
+	HALT
+end
+label test:
+	ADDI
+	RET
+end

@@ -1,4 +1,4 @@
-#include "vm.h"
+#include "main.h"
 #include <unistd.h>
 
 void printstk() {
@@ -19,7 +19,8 @@ void clearConsole() {
 }
 
 void printInstruction(instruction_t *i) {
-	printf("\x1b[34mOPCODE: 0x%02x\n", i->opcode);
+	printf("\x1b[34m");
+	printf("OPCODE: 0x%02x\n", i->opcode);
 	printf("\x1B[0m");
 }
 
@@ -30,17 +31,53 @@ int halt() {
 void emit(stackobject_t obj) {
 	switch (obj.type) {
 		case I16_T:
-			printf("%d\n", obj.data.i16);
+			printf("%d", obj.data.i16);
 		break;
-		default:
-			printf("shrug\n");
-			break;
 	}
 }
 
-int main (int argc, char **argv) {
+void printUsage() {
+	printf("Usage: vm [options] <file>\n");
+}
 
+void printHelp() {
+	printUsage();
+	printf("Options:\n");
+	printf("  -h    Show help (this screen)\n");
+	printf("  -d    Enable debug mode\n");
+}
+
+int main (int argc, char **argv) {
+	// The filename will always be the last argument
 	char *filename = argv[argc - 1];
+
+	// Option parsing from K&R
+	// Explained: http://www.usrsb.in/How-Old-School-C-Programmers-Process-Arguments.html
+	char *s;
+	while (--argc > 0 && (*++argv)[0] == '-') {
+		for(s = argv[0]+1; *s != '\0'; s++) {
+			switch(*s) {
+				case 'h':
+					printHelp();
+					return 0;
+					break;
+				case 'd':
+					debug = true;
+					break;
+				default:
+					printf("\x1b[31mIllegal Option: %c\e[0m\n", *s);
+					argc = 0;
+					break;
+			}
+		}
+	}
+
+
+	if (filename[0] == '-') {
+		printUsage();
+		return 10;
+	}
+
 	pc = 0;
 	sp = -1;
 	opcount = 0;
@@ -105,8 +142,8 @@ int main (int argc, char **argv) {
 
 	instruction_t current = code[pc];
 	while (current.opcode != HALT) {
-		if (DEBUG) {
-			clearConsole();
+		if (debug) {
+			// clearConsole();
 			printf("\x1b[31mOP #%lld\x1b[0m\n", opcount);
 			printInstruction(&current);
 			printf("Stack before OP:\n\t");
@@ -159,7 +196,6 @@ void step(instruction_t current) {
 
 			case JUMP:
 				pc = current.operand.data.i16;
-				// pc++;
 				break;
 
 			default:
